@@ -89,9 +89,7 @@ echo "------"</pre>
     </div>
     <div class="snippet">
       <h2>restore.sh</h2>
-      <pre id="code4">ls -la /backup
-
-PS3="Select the backup file you would like to restore from: "
+      <pre id="code4">PS3="Select the backup file you would like to restore from: "
 select backupfile in /backup/*; do [ -n "$backupfile" ] && break; done
 
 rm -rf /repo
