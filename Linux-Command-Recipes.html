@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Linux Command Recipes — Beginner Edition</title>
+<style>
+  :root{
+    --bg:#0a0e14;
+    --ink:#f4f7fb;
+    --muted:#c2cbe0;
+    --card:#0f1622;
+    --line:#263149;
+    --accent:#7cc7ff;
+    --accent-2:#9cf2c3;
+    --accent-3:#ffd07a;
+    --accent-4:#f7a8ff;
+    --accent-5:#ffa07a;
+    --mono:"JetBrains Mono",ui-monospace,Consolas,Menlo,monospace;
+    --sans:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#0a0e14;color:#f4f7fb;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+  .wrap{max-width:920px;margin:0 auto;padding:28px 18px 64px}
+  header{margin-bottom:18px}
+  h1{font-size:28px;letter-spacing:.3px;margin:0 0 6px 0;color:#7cc7ff}
+  .subtitle{color:#c2cbe0;font-size:14px}
+
+  .recipe{background:#0f1622;border:1px solid #263149;border-radius:18px;padding:18px 16px;margin:22px 0}
+  .recipe h2{margin:0 0 12px 0;font-size:22px;color:#ffd07a;letter-spacing:.5px;text-transform:uppercase;border-bottom:2px solid #263149;padding-bottom:4px}
+  .k{color:#c2cbe0;font-size:12px;text-transform:uppercase;letter-spacing:.12em;margin-top:12px}
+  .val{font-size:15px;line-height:1.5}
+
+  .step{margin:10px 0;padding:10px 12px;border-left:3px solid #263149;background:#0c1422;border:1px solid #263149;border-radius:10px}
+  .step .title{font-weight:600;color:#f7a8ff}
+  .step .body{margin-top:6px;font-size:14px}
+
+  code{font-family:"JetBrains Mono",ui-monospace,Consolas,Menlo,monospace;background:#0e1520;border:1px solid #263149;padding:3px 6px;border-radius:8px}
+  pre{background:#0e1520;border:1px solid #263149;padding:12px;border-radius:12px;overflow:auto;font-family:"JetBrains Mono",ui-monospace,Consolas,Menlo,monospace;font-size:13px;white-space:pre-wrap}
+  .example{border:1px dashed #34507a;background:#0b1220;border-radius:12px;padding:10px;margin-top:8px}
+  .example b{color:#9cf2c3;display:block;margin-bottom:4px}
+  .callout{font-size:12px;}
+  .c1{color:#ffd07a;}
+  .c2{color:#9cf2c3;}
+  .c3{color:#f7a8ff;}
+  .c4{color:#ffa07a;}
+  .ascii{color:#c2cbe0;}
+
+  @media print{
+    body{background:#fff;color:#000}
+    .recipe{page-break-inside:avoid;border-color:#bbb;background:#fff}
+    code,pre{background:#f7f9fc;border-color:#e5eaf0;color:#000}
+    .example{background:#fff;border-color:#ccc}
+    .callout{color:#444}
+    .ascii{color:#999}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Linux Command Recipes — Beginner Edition</h1>
+      <div class="subtitle">Simple, linear recipes for building commands step by step.</div>
+    </header>
+
+    <!-- Symbols first -->
+    <section class="recipe">
+      <h2>Symbol Reference</h2>
+      <div class="val">
+        <p><code>~</code> → home directory</p>
+        <p><code>/</code> → root directory</p>
+        <p><code>*</code> → wildcard (match anything)</p>
+        <p><code>.</code> → current directory</p>
+        <p><code>..</code> → up one level</p>
+      </div>
+    </section>
+
+    <!-- Prompt -->
+    <section class="recipe">
+      <h2>Understanding the Prompt</h2>
+      <div class="val">
+        <p>The command prompt usually shows <b>who you are</b> and <b>where you are</b> in the filesystem.</p>
+        <div class="example"><b>Example Prompt</b><pre>student@machine:/etc$
+<span class="callout c1"><span class="ascii">  │                └─</span> current directory (/etc)</span>
+<span class="callout c2"><span class="ascii">  └─</span> user (student)</span></pre></div>
+        <p>This helps you know what “here” means when using commands like <code>ls</code> or <code>cd</code>.</p>
+      </div>
+    </section>
+
+    <!-- cd -->
+    <section class="recipe">
+      <h2>cd — Change Directory</h2>
+      <div class="k">Purpose</div>
+      <div class="val">Move between folders in the filesystem.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>cd</code></div></div>
+      <div class="step"><div class="title">2) Target</div><div class="body">Path of the folder you want to enter (<code>..</code> up one, <code>~</code> home)</div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>Go to your home directory</b><pre>cd ~
+<span class="callout c1"><span class="ascii">   └─</span> tilde (~) means home</span></pre></div>
+      <div class="example"><b>Go to the /etc directory</b><pre>cd /etc
+<span class="callout c1"><span class="ascii">     └─</span> absolute path from root</span></pre></div>
+    </section>
+
+    <!-- pwd -->
+    <section class="recipe">
+      <h2>pwd — Print Working Directory</h2>
+      <div class="k">Purpose</div>
+      <div class="val">Show the full path of your current folder.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>pwd</code></div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>Where am I?</b><pre>pwd
+<span class="callout c1"><span class="ascii"> └─</span> prints your current directory path</span></pre></div>
+    </section>
+
+    <!-- ls -->
+    <section class="recipe">
+      <h2>ls — List Directory</h2>
+      <div class="k">Purpose</div>
+      <div class="val">View directory contents with options for details, hidden files, or sorting.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>ls</code></div></div>
+      <div class="step"><div class="title">2) Flags: Options</div><div class="body"><code>-l</code> details, <code>-a</code> hidden, <code>-h</code> human sizes, <code>-t</code> sort by time</div></div>
+      <div class="step"><div class="title">3) Target</div><div class="body">What location would you like to list (this is optional, if left blank it will list “here”)</div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>Details + hidden</b><pre>ls -la
+<span class="callout c1"><span class="ascii">     └─</span> -l details, -a all files includes hidden files</span></pre></div>
+<div class="example"><b>Newest files first</b><pre>ls -lt /etc
+<span class="callout c1"><span class="ascii">     │   └─</span> what location you would like to list</span>
+<span class="callout c2"><span class="ascii">     └─</span> -l details, -t sort by time</span></pre></div>
+
+    </section>
+
+    <!-- mkdir -->
+    <section class="recipe">
+      <h2>mkdir — Make Directory</h2>
+      <div class="k">Purpose</div>
+      <div class="val">Create new folders. Use <code>-p</code> to create parent folders as needed.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>mkdir</code></div></div>
+      <div class="step"><div class="title">2) Flags</div><div class="body"><code>-p</code> use this flag if you want to make folders within folders with this single command</div></div>
+      <div class="step"><div class="title">3) Target</div><div class="body">What would you like to name your folder. You can also put a location before the name to make the folder somewhere other than here. (e.g. usr/place/foldername instead of just foldername)</div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>Create a single folder</b><pre>mkdir notes
+<span class="callout c1"><span class="ascii">        └─</span> folder name to create</span></pre></div>
+      <div class="example"><b>Create nested folders if needed</b><pre>mkdir -p logs/2025/09
+<span class="callout c1"><span class="ascii">       └─</span> -p creates folders inside of folders if necessary</span></pre></div>
+    </section>
+
+    <!-- rm -->
+    <section class="recipe">
+      <h2>rm — Remove</h2>
+      <div class="k">Purpose</div>
+      <div class="val">Delete files or directories. ⚠️ Destructive — use carefully.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>rm</code></div></div>
+      <div class="step"><div class="title">2) Flags</div><div class="body"><code>-r</code> this flag is necessary to remove folders, <code>-f</code> force (tells computer, do this command no matter what), <code>-i</code> interactive (tells computer, ask me questions while you're deleting things)</div></div>
+      <div class="step"><div class="title">3) Targets</div><div class="body">Name of the file or folder you would like to remove</div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>Delete one file</b><pre>rm old.txt
+<span class="callout c1"><span class="ascii">     └─</span> file to remove</span></pre></div>
+      <div class="example"><b>Delete a folder and everything inside</b><pre>rm -r backup/
+<span class="callout c1"><span class="ascii">    └─</span> -r removes your target, but also anything inside of it</span></pre></div>
+      <div class="example"><b>Force delete many logs</b><pre>rm -f *.log
+<span class="callout c2"><span class="ascii">    │  └─</span> wildcard: all files ending in .log</span>
+<span class="callout c1"><span class="ascii">    └─</span> force (tells computer: don't ask any questions, just do it)</span></pre></div>
+    </section>
+
+    <!-- mv -->
+    <section class="recipe">
+      <h2>mv — Move or Rename</h2>
+      <div class="k">Purpose</div>
+      <div class="val">Move files/folders to a new location or rename them.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>mv</code></div></div>
+      <div class="step"><div class="title">2) Source(s)</div><div class="body">Old file or folder you would like to move/rename</div></div>
+      <div class="step"><div class="title">3) Destination</div><div class="body">New name or folder path</div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>Rename a file</b><pre>mv draft.txt final.txt
+<span class="callout c2"><span class="ascii">      │          └─</span> new name</span>
+<span class="callout c4"><span class="ascii">      └─</span> old name</span></pre></div>
+      <div class="example"><b>Move a file into a folder</b><pre>mv report.pdf /tmp/
+<span class="callout c2"><span class="ascii">     │           └─</span> where to put it</span>
+<span class="callout c4"><span class="ascii">     └─</span> what to move</span></pre></div>
+    </section>
+
+    <!-- cat -->
+    <section class="recipe">
+      <h2>cat — Show File Contents</h2>
+      <div class="k">Purpose</div>
+      <div class="val">View a file's contents in the terminal, or join multiple files together.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>cat</code></div></div>
+      <div class="step"><div class="title">2) Targets</div><div class="body">Name of file you would like to view</div></div>
+      <div class="step"><div class="title">3) Redirection (optional)</div><div class="body">Use <code>&gt;</code> to write output into a new file</div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>View a file</b><pre>cat notes.txt
+<span class="callout c4"><span class="ascii">      └─</span> file to display</span></pre></div>
+      <div class="example"><b>Concatenate two files into a new one</b><pre>cat a.txt b.txt > both.txt
+<span class="callout c2"><span class="ascii">       │    │          └─</span> new file</span>
+<span class="callout c1"><span class="ascii">       │    └─</span> second file (added after first)</span>
+<span class="callout c4"><span class="ascii">       └─</span> first file</span></pre></div>
+    </section>
+
+    <!-- grep -->
+    <section class="recipe">
+      <h2>grep — Search Text</h2>
+      <div class="k">Purpose</div>
+      <div class="val">Search for text inside of a file.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>grep</code></div></div>
+      <div class="step"><div class="title">2) Pattern</div><div class="body">Quote the text to search for, e.g. <code>"error"</code></div></div>
+      <div class="step"><div class="title">3) Targets</div><div class="body">What file or folder do you want to search?</div></div>
+      <div class="step"><div class="title">4) Flags: Modifiers</div><div class="body"><code>-i</code> says don't worry about uppercase and lowercase, <code>-n</code> show line numbers, <code>-R</code> if there's folders inside of what we're searching, search those too</div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>Search for the word "error" in a file</b><pre>grep "error" app.log
+<span class="callout c1"><span class="ascii">        │       └─</span> search inside of this file</span>
+<span class="callout c2"><span class="ascii">        └─</span> search for: "error"</span></pre></div>
+      <div class="example"><b>Search for "error", ignoring case and showing line numbers</b><pre>grep -in "error" app.log
+<span class="callout c1"><span class="ascii">       │     │      └─</span> search inside of this file</span>
+<span class="callout c2"><span class="ascii">       │     └─</span> search for: "error"</span>
+<span class="callout c3"><span class="ascii">       └─</span> -i ignore case, -n line numbers</span></pre></div>
+      <div class="example"><b>Search recursively for "main()" in source folder</b><pre>grep -R "main()" src/
+<span class="callout c1"><span class="ascii">      │     │       └─</span> search inside of this folder</span>
+<span class="callout c2"><span class="ascii">      │     └─</span> search for: "main()"</span>
+<span class="callout c3"><span class="ascii">      └─</span> -R recursive (meaning if there's folders inside of what we're searching, search those too)</span></pre></div>
+    </section>
+
+    <!-- find -->
+    <section class="recipe">
+      <h2>find — Locate Files</h2>
+      <div class="k">Purpose</div>
+      <div class="val">Search for files by name, size, type, or modified time.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>find</code></div></div>
+      <div class="step"><div class="title">2) Path</div><div class="body">Where to search (e.g. <code>.</code> for here)</div></div>
+      <div class="step"><div class="title">3) Flags: Type</div><div class="body"><code>-type f</code> only search for files, <code>-type d</code> only search for folders (also known as directories)</div></div>
+      <div class="step"><div class="title">4) Flags: Filters</div><div class="body"><code>-name</code> name we're searching for, <code>-size</code> by size, <code>-mtime</code> by modified time</div></div>
+
+<div class="k">Examples</div>
+<div class="example"><b>Find "logfile" in current folder</b><pre>find . -type f -name "logfile"
+<span class="callout c1"><span class="ascii">      │       │          └─</span> filename to search for</span>
+<span class="callout c2"><span class="ascii">      │       └─</span> -type f (files)</span>
+<span class="callout c4"><span class="ascii">      └─</span> where to search (. means here)</span></pre></div>
+
+<div class="example"><b>Find files larger than 50 MB in /var</b><pre>find /var -type f -size +50M
+<span class="callout c1"><span class="ascii">       │     │        └─</span> size filter</span>
+<span class="callout c2"><span class="ascii">       │     └─</span> -type f (files)</span>
+<span class="callout c4"><span class="ascii">       └─</span> where to search (/var)</span></pre></div>
+
+    </section>
+
+    <!-- chmod (symbolic, show = + - in steps; examples keep =) -->
+    <section class="recipe">
+      <h2>chmod — Permissions (Symbolic)</h2>
+      <div class="k">Purpose</div>
+      <div class="val">Set permissions for user/group/others using symbolic form.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>chmod</code></div></div>
+      <div class="step"><div class="title">2) Who</div><div class="body"><code>u</code> = user (owner), <code>g</code> = group, <code>o</code> = others, <code>a</code> = all</div></div>
+      <div class="step"><div class="title">3) Operators</div><div class="body"><code>=</code> set exactly, <code>+</code> add, <code>-</code> remove</div></div>
+      <div class="step"><div class="title">4) What</div><div class="body"><code>r</code> read, <code>w</code> write, <code>x</code> execute</div></div>
+      <div class="step"><div class="title">5) Target</div><div class="body">Which file or folder would we like to change the permissions of</div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>User gets read & write</b><pre>chmod u=rw file.txt
+<span class="callout c1"><span class="ascii">        │      └─</span> change the permissions of this file</span>
+<span class="callout c2"><span class="ascii">        └─</span> who= u (user), what = rw (read and write)</span></pre></div>
+
+      <div class="example"><b>Group & others read-only</b><pre>chmod go=r notes.txt
+<span class="callout c1"><span class="ascii">        │     └─</span> change the permissions of this file</span>
+<span class="callout c2"><span class="ascii">        └─</span> who = g (group), o (owner)  what = r (read)</span></pre></div>
+
+      <div class="example"><b>User read, write & execute</b><pre>chmod u=rwx script.sh
+<span class="callout c1"><span class="ascii">        │       └─</span> change the permissions of this file</span>
+<span class="callout c2"><span class="ascii">        └─</span> who = u (user) what = rwx (read, write, and execute)</span></pre></div>
+    </section>
+
+    <!-- tar -->
+    <section class="recipe">
+      <h2>tar — Archives</h2>
+      <div class="k">Purpose</div>
+      <div class="val">Create, extract, or list compressed archives.</div>
+
+      <div class="k">Steps</div>
+      <div class="step"><div class="title">1) Base Tool</div><div class="body"><code>tar</code></div></div>
+      <div class="step"><div class="title">2) Flags: Main Action</div><div class="body"><code>-c</code> create, <code>-x</code> extract, <code>-t</code> list</div></div>
+      <div class="step"><div class="title">3) Flags: Compression</div><div class="body"><code>-z</code> gzip, <code>-j</code> bzip2, <code>-J</code> xz</div></div>
+      <div class="step"><div class="title">4) Flags: File Handling</div><div class="body"><code>-f</code> always include f flag when using tar</div></div>
+      <div class="step"><div class="title">5) Targets</div><div class="body">What is the name of the archive we are working with (include file extension in this name, so like .tar at the end of the name)</div></div>
+
+      <div class="k">Examples</div>
+      <div class="example"><b>Create a gzip archive with a folder inside</b><pre>tar -czf backup.tar mydir/
+<span class="callout c1"><span class="ascii">      │     │          └─</span> what to put inside your archive</span>
+<span class="callout c2"><span class="ascii">      │     └─</span> what you want to name your tar archive (make sure to include .tar at the end of name)</span>
+<span class="callout c3"><span class="ascii">      └─</span> -c create, -z gzip, -f (always do f)</span>
+      <div class="example"><b>Extract from an archive</b><pre>tar -xf backup.tar
+<span class="callout c1"><span class="ascii">      │   └─</span> name of the archive you want to extract from</span>
+<span class="callout c2"><span class="ascii">      └─</span> -x extract, -f (always do f)</span></pre></div>
+      <div class="example"><b>Look inside an archive (list)</b><pre>tar -tf backup.tar
+<span class="callout c1"><span class="ascii">      │     └─</span> name of the archive you want to look inside</span>
+<span class="callout c2"><span class="ascii">      └─</span> -t list, -f (always do f)</span></pre></div>
+    </section>
+
+    <!-- Paths: Absolute vs Relative (moved to end) -->
+    <section class="recipe">
+      <h2>Paths — Absolute vs Relative</h2>
+      <div class="val">
+        <p><b>Absolute path</b>: starts with <code>/</code> and points from the <i>root</i> of the filesystem. Works from anywhere. Example: <code>/etc/nginx/nginx.conf</code>.</p>
+        <p><b>Relative path</b>: does <i>not</i> start with <code>/</code>. It's interpreted from your <i>current directory</i> (what <code>pwd</code> shows). Examples: <code>docs/report.txt</code>, <code>student/images</code>, <code>./run.sh</code>.</p>
+        <p><b>Home shortcut</b>: <code>~</code> expands to your home directory (e.g., <code>/home/student</code>), so <code>~/Downloads</code> is an absolute location after expansion.</p>
+
+        <div class="example"><b>Absolute vs Relative in practice</b><pre>cd /var/log
+<span class="callout c1"><span class="ascii">      └─</span> absolute: starts at / (root), valid from anywhere</span></pre></div>
+
+        <div class="example"><b>Go to a subfolder (relative)</b><pre>cd student/images
+<span class="callout c2"><span class="ascii">      └─</span> relative: “student/images” from where you are now</span></pre></div>
+
+        <div class="example"><b>Home shortcut</b><pre>cd ~/Downloads
+<span class="callout c3"><span class="ascii">      └─</span> “~” expands to /home/student (your home)</span></pre></div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
