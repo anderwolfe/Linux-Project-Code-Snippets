@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Media Gallery</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <!-- Left-aligned responsive banner -->
+    <img class="banner" src="banner.png" alt="Damian Portfolio Banner" />
+    <div class="searchbox">
+      <input type="search" id="q" placeholder="Search by title or caption" aria-label="Search" />
+    </div>
+  </div>
+</header>
+<br>
+
+
+<main class="wrap">
+  <section id="grid" class="grid" aria-live="polite"></section>
+  <p class="footer">You can put footer text here if you want.</p><br>
+</main>
+
+
+<!-- Lightbox -->
+<dialog id="lightbox" aria-label="Media viewer">
+  <div class="modal-head">
+    <div class="modal-title" id="lbTitle"></div>
+    <button class="btn" id="lbClose">Close</button>
+  </div>
+  <div class="modal-media" id="lbMedia"></div>
+  <div style="padding:12px 14px; font-size:13px; color:var(--muted)" id="lbDesc"></div>
+</dialog>
+
+<script>
+(function(){
+  const grid = document.getElementById('grid');
+  const q = document.getElementById('q');
+  const lb = document.getElementById('lightbox');
+  const lbTitle = document.getElementById('lbTitle');
+  const lbMedia = document.getElementById('lbMedia');
+  const lbDesc = document.getElementById('lbDesc');
+  const lbClose = document.getElementById('lbClose');
+
+  let SETTINGS = { alwaysShowCaptions:false };
+  let DATA = { items: [] };
+
+  // Load from content.json (same folder)
+  async function loadData(){
+    try{
+      const res = await fetch('content.json', {cache:'no-store'});
+      if(!res.ok) throw new Error('Missing content.json');
+      const json = await res.json();
+      // Accept either {settings, items:[...]} or just [ ... ]
+      if(Array.isArray(json)){ DATA = { items: json }; }
+      else { DATA = { items: json.items || [] }; SETTINGS = Object.assign(SETTINGS, json.settings || {}); }
+
+      const items = DATA.items.map(normalizeItem);
+      render(items);
+    }catch(e){
+      grid.innerHTML = `
+        <div class="card" style="padding:14px; display:block">
+          <div class="meta" style="position:static; opacity:1; transform:none; background:none; padding:0">
+            <div class="title">Could not load <code>content.json</code></div>
+            <div class="desc">Ensure it exists next to <code>index.html</code> and you are viewing via http://</div>
+          </div>
+        </div>`;
+      console.error(e);
+    }
+  }
+
+  function normalizeItem(it){
+    const t = (it.type||'').toLowerCase();
+    const size = (it.size || 'm').toLowerCase(); // default to m
+    const sizeClass =
+      size === 'xl' ? 'size-xl' :
+      size === 'l'  ? 'size-l'  :
+      size === 's'  ? 'size-s'  : 'size-m';
+
+    // per-item override for caption visibility (true/false)
+    const show = (typeof it.showCaptions === 'boolean') ? it.showCaptions : null;
+
+    return {
+      type: t,
+      title: it.title || '',
+      description: it.description || '',
+      src: it.src || '',
+      /* For YouTube, respect a custom `thumb`; otherwise use default YT thumb */
+      thumb: it.thumb || (t==='youtube' ? youtubeThumb(it.src) : it.src),
+      sizeClass,
+      showCaptions: show
+    };
+  }
+
+  function cardHTML(it, idx){
+    const safeTitle = escapeHtml(it.title || 'Untitled');
+    const safeDesc = escapeHtml(it.description || '');
+    const isYT = it.type === 'youtube';
+
+    const media = isYT
+      ? `<img class="ytpad" src="${it.thumb}" alt="${safeTitle}" loading="lazy" />`
+      : `<img src="${it.thumb}" alt="${safeTitle}" loading="lazy" />`;
+
+    const play = isYT ? '<div class="ytplay"><div class="play" aria-hidden="true"></div></div>' : '';
+
+    // Always-show logic: global settings OR per-item override true
+    const always = (it.showCaptions === true) || (it.showCaptions === null && SETTINGS.alwaysShowCaptions);
+
+    return `
+      <article class="card ${it.sizeClass} ${always ? 'always-show':''}" data-type="${it.type}" data-open="${idx}" tabindex="0" aria-label="Open ${safeTitle}">
+        <div class="thumb">
+          ${media}
+          ${play}
+          <div class="meta">
+            <div class="title">${safeTitle}</div>
+            ${safeDesc ? `<div class="desc">${safeDesc}</div>` : ''}
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function render(items){
+    grid.innerHTML = items.map((it, i) => cardHTML(it, i)).join('');
+
+    // open handlers
+    grid.querySelectorAll('.card').forEach((card, i) => {
+      card.addEventListener('click', () => openItem(items[i]));
+      card.addEventListener('keydown', e => {
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openItem(items[i]); }
+      });
+    });
+
+    // search
+    q.addEventListener('input', () => {
+      const query = (q.value || '').trim().toLowerCase();
+      const filtered = items.filter(it => !query || (it.title + ' ' + it.description).toLowerCase().includes(query));
+      grid.innerHTML = filtered.map((it, i) => cardHTML(it, i)).join('');
+      grid.querySelectorAll('.card').forEach((card, i) => {
+        card.addEventListener('click', () => openItem(filtered[i]));
+        card.addEventListener('keydown', e => {
+          if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openItem(filtered[i]); }
+        });
+      });
+    });
+  }
+
+  function openItem(it){
+    lbTitle.textContent = it.title || '';
+    lbDesc.textContent = it.description || '';
+    lbMedia.innerHTML = '';
+    if(it.type === 'youtube'){
+      lbMedia.innerHTML = `<iframe src="${youtubeEmbed(it.src)}" title="${escapeHtml(it.title||'Video')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    }else{
+      const img = document.createElement('img');
+      img.src = it.src; img.alt = it.title || '';
+      lbMedia.appendChild(img);
+    }
+    lb.showModal();
+  }
+
+  // --- Lightbox close helpers ---
+  function closeLb(){
+    // Clear media so YouTube stops playing, then close the dialog
+    lbMedia.innerHTML = '';
+    lb.close();
+  }
+  // Close via button
+  lbClose.addEventListener('click', () => closeLb());
+  // Close by clicking the backdrop (outside the dialog content)
+  lb.addEventListener('click', (e) => { if (e.target === lb) closeLb(); });
+  // Close with Esc key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lb.open) closeLb();
+  });  
+
+  function youtubeId(url){
+    try{
+      const u = new URL(url);
+      if(u.hostname.includes('youtube.com')) return u.searchParams.get('v');
+      if(u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+    }catch(e){}
+    return null;
+  }
+  function youtubeThumb(url){
+    const id = youtubeId(url); if(!id) return '';
+    return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+  }
+  function youtubeEmbed(url){
+    const id = youtubeId(url); if(!id) return '';
+    return `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+  }
+
+  loadData();
+})();
+</script>
+</body>
+</html>
